@@ -59,7 +59,7 @@ seguenti entità (`A1` = codice area senza il prefisso `Emil-`):
 
 | Entità | Descrizione |
 | --- | --- |
-| `sensor.allerta_er_a1_eventoo` | Livello di allerta dell'area (`verde`, `giallo`, …) |
+| `sensor.allerta_er_a1_evento` | Livello di allerta dell'area (`verde`, `giallo`, …) |
 | `sensor.allerta_er_a1_nota` | Nota del bollettino (anteprima); **testo integrale** nell'attributo `testo` |
 | `sensor.allerta_er_a1_inizio_validita` | Inizio validità (`onset`) |
 | `sensor.allerta_er_a1_fine_validita` | Fine validità (`expires`) |
@@ -118,7 +118,7 @@ aggiornamento usa il servizio `homeassistant.update_entity` sull'entità.
 
 Puoi copiare questo blocco YAML direttamente in una card di tipo "Manuale" (Dashboard → Modifica → Aggiungi card → Manuale).
 
-> **Nota:** gli entity_id qui sono in inglese (`sensor.allerta_er_a1_nota`, `sensor.allerta_er_a1_idraulico`, ...). Se la tua istanza HA ha la lingua italiana, gli ID saranno localizzati (es. `sensor.allerta_er_a1_nota`, `sensor.allerta_er_a1_idraulico`). In quel caso sostituiscili con quelli effettivamente presenti nella tua istanza.
+> **Nota:** l'esempio usa gli entity_id in italiano (`sensor.allerta_er_a1_evento`, `sensor.allerta_er_a1_nota`, ...), come prodotti da un'istanza HA in lingua italiana. Se la tua istanza ha la lingua inglese, gli ID saranno in inglese (es. `sensor.allerta_er_a1_event`): in quel caso sostituiscili con quelli effettivamente presenti nella tua istanza.
 
 ```yaml
 type: vertical-stack
