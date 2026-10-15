@@ -1,0 +1,11 @@
+{
+  "domain": "ha_allerta_er",
+  "name": "Allerta Emilia-Romagna",
+  "codeowners": ["@marcopiccinni"],
+  "config_flow": true,
+  "documentation": "https://github.com/marcopiccinni/ha_allerta_er",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/marcopiccinni/ha_allerta_er/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

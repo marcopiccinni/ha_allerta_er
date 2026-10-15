@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Allerta Emilia-Romagna",
+        "description": "Pick the alert area (AllertaMeteoER) to monitor.\n\nOfficial bulletin: {site}\n\n**Disclaimer**: {disclaimer}",
+        "data": {
+          "area": "Alert area"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to download the CAP feed from AllertaMeteoER. Try again later.",
+      "invalid_area": "The selected area is not available in the current feed. Pick another one."
+    },
+    "abort": {
+      "already_configured": "This alert area is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Allerta options",
+        "description": "Refresh interval, in seconds (60 - 86400).",
+        "data": {
+          "scan_interval": "CAP feed refresh (s)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "event": { "name": "Event" },
+      "note": { "name": "Note" },
+      "onset": { "name": "Valid from" },
+      "expires": { "name": "Valid until" },
+      "sent": { "name": "Issued" },
+      "identifier": { "name": "Bulletin number" },
+      "idraulico": { "name": "Hydraulic" },
+      "idrogeologico": { "name": "Hydrogeological" },
+      "temporali": { "name": "Thunderstorms" },
+      "vento": { "name": "Wind" },
+      "temperature_estreme": { "name": "Extreme temperatures" },
+      "neve": { "name": "Snow" },
+      "pioggia_che_gela": { "name": "Freezing rain" },
+      "stato_mare": { "name": "Sea state" },
+      "mareggiate": { "name": "Storm surge" }
+    },
+    "binary_sensor": {
+      "alert_active": { "name": "Alert active" }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Allerta Emilia-Romagna",
+        "description": "Scegli l'area di allertamento (AllertaMeteoER) da monitorare.\n\nBollettino ufficiale: {site}\n\n**Disclaimer**: {disclaimer}",
+        "data": {
+          "area": "Area di allertamento"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Download del feed CAP da AllertaMeteoER non riuscito. Riprova piu' tardi.",
+      "invalid_area": "L'area selezionata non e' disponibile nel feed corrente. Scegline un'altra."
+    },
+    "abort": {
+      "already_configured": "Questa area di allertamento e' gia' configurata."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni Allerta",
+        "description": "Intervallo di aggiornamento, in secondi (60 - 86400).",
+        "data": {
+          "scan_interval": "Aggiornamento feed CAP (s)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "event": { "name": "Evento" },
+      "note": { "name": "Nota" },
+      "onset": { "name": "Inizio validita'" },
+      "expires": { "name": "Fine validita'" },
+      "sent": { "name": "Inviato" },
+      "identifier": { "name": "Numero bollettino" },
+      "idraulico": { "name": "Idraulico" },
+      "idrogeologico": { "name": "Idrogeologico" },
+      "temporali": { "name": "Temporali" },
+      "vento": { "name": "Vento" },
+      "temperature_estreme": { "name": "Temperature estreme" },
+      "neve": { "name": "Neve" },
+      "pioggia_che_gela": { "name": "Pioggia che gela" },
+      "stato_mare": { "name": "Stato del mare" },
+      "mareggiate": { "name": "Mareggiate" }
+    },
+    "binary_sensor": {
+      "alert_active": { "name": "Allerta attiva" }
+    }
+  }
+}
