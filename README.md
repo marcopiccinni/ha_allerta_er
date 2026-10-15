@@ -59,7 +59,7 @@ seguenti entità (`A1` = codice area senza il prefisso `Emil-`):
 
 | Entità | Descrizione |
 | --- | --- |
-| `sensor.allerta_er_a1_evento` | Livello di allerta dell'area (`verde`, `giallo`, …) |
+| `sensor.allerta_er_a1_eventoo` | Livello di allerta dell'area (`verde`, `giallo`, …) |
 | `sensor.allerta_er_a1_nota` | Nota del bollettino (anteprima); **testo integrale** nell'attributo `testo` |
 | `sensor.allerta_er_a1_inizio_validita` | Inizio validità (`onset`) |
 | `sensor.allerta_er_a1_fine_validita` | Fine validità (`expires`) |
@@ -118,7 +118,7 @@ aggiornamento usa il servizio `homeassistant.update_entity` sull'entità.
 
 Puoi copiare questo blocco YAML direttamente in una card di tipo "Manuale" (Dashboard → Modifica → Aggiungi card → Manuale).
 
-> **Nota:** gli entity_id qui sono in inglese (`sensor.allerta_er_a1_note`, `sensor.allerta_er_a1_hydraulic`, ...). Se la tua istanza HA ha la lingua italiana, gli ID saranno localizzati (es. `sensor.allerta_er_a1_nota`, `sensor.allerta_er_a1_idraulico`). In quel caso sostituiscili con quelli effettivamente presenti nella tua istanza.
+> **Nota:** gli entity_id qui sono in inglese (`sensor.allerta_er_a1_nota`, `sensor.allerta_er_a1_idraulico`, ...). Se la tua istanza HA ha la lingua italiana, gli ID saranno localizzati (es. `sensor.allerta_er_a1_nota`, `sensor.allerta_er_a1_idraulico`). In quel caso sostituiscili con quelli effettivamente presenti nella tua istanza.
 
 ```yaml
 type: vertical-stack
@@ -128,119 +128,119 @@ cards:
     title: Allerta Emilia-Romagna — Emil-A1
     show_header_toggle: false
     entities:
-      - entity: binary_sensor.allerta_er_a1_alert_active
+      - entity: binary_sensor.allerta_er_a1_allerta_attiva
         name: Allerta attiva
-      - entity: sensor.allerta_er_a1_event
+      - entity: sensor.allerta_er_a1_evento
         name: Livello di allerta (evento)
-      - entity: sensor.allerta_er_a1_issued
+      - entity: sensor.allerta_er_a1_inviato
         name: Emesso (sent)
-      - entity: sensor.allerta_er_a1_valid_from
+      - entity: sensor.allerta_er_a1_inizio_validita
         name: Valido da (onset)
-      - entity: sensor.allerta_er_a1_valid_until
+      - entity: sensor.allerta_er_a1_fine_validita
         name: Valido fino a (expires)
 
   # Nota del bollettino (testo integrale)
   - type: markdown
     title: Nota del bollettino
     content: |
-      {{ state_attr('sensor.allerta_er_a1_note', 'testo') | default('Nessuna nota disponibile.') }}
+      {{ state_attr('sensor.allerta_er_a1_nota', 'testo') | default('Nessuna nota disponibile.') }}
 
   # Criticità IDRAULICA — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_hydraulic
+      - entity: sensor.allerta_er_a1_idraulico
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_hydraulic
+      entity: sensor.allerta_er_a1_idraulico
       name: Idraulico
       icon: mdi:water
 
   # Criticità IDROGEOLOGICA — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_hydrogeological
+      - entity: sensor.allerta_er_a1_idrogeologico
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_hydrogeological
+      entity: sensor.allerta_er_a1_idrogeologico
       name: Idrogeologico
       icon: mdi:landslide
 
   # Temporali — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_thunderstorms
+      - entity: sensor.allerta_er_a1_temporali
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_thunderstorms
+      entity: sensor.allerta_er_a1_temporali
       name: Temporali
       icon: mdi:weather-lightning
 
   # Vento — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_wind
+      - entity: sensor.allerta_er_a1_vento
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_wind
+      entity: sensor.allerta_er_a1_vento
       name: Vento
       icon: mdi:weather-windy
 
   # Temperature estreme — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_extreme_temperatures
+      - entity: sensor.allerta_er_a1_temperature_estreme
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_extreme_temperatures
+      entity: sensor.allerta_er_a1_temperature_estreme
       name: Temperature estreme
       icon: mdi:thermometer-alert
 
   # Neve — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_snow
+      - entity: sensor.allerta_er_a1_neve
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_snow
+      entity: sensor.allerta_er_a1_neve
       name: Neve
       icon: mdi:weather-snowy
 
   # Pioggia che gela — mostrata solo se diversa da "verde"
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_freezing_rain
+      - entity: sensor.allerta_er_a1_pioggia_che_gela
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_freezing_rain
+      entity: sensor.allerta_er_a1_pioggia_che_gela
       name: Pioggia che gela
       icon: mdi:weather-snowy-rainy
 
   # Stato del mare — mostrata solo se diversa da "verde" (disabilitata di default)
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_sea_state
+      - entity: sensor.allerta_er_a1_stato_mare
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_sea_state
+      entity: sensor.allerta_er_a1_stato_mare
       name: Stato del mare
       icon: mdi:waves
 
   # Mareggiate — mostrata solo se diversa da "verde" (disabilitata di default)
   - type: conditional
     conditions:
-      - entity: sensor.allerta_er_a1_storm_surge
+      - entity: sensor.allerta_er_a1_mareggiate
         state_not: "verde"
     card:
       type: entity
-      entity: sensor.allerta_er_a1_storm_surge
+      entity: sensor.allerta_er_a1_mareggiate
       name: Mareggiate
       icon: mdi:wave
 ```
