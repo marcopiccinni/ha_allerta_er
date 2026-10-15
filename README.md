@@ -112,3 +112,139 @@ aggiornamento usa il servizio `homeassistant.update_entity` sull'entità.
 ## Licenza
 
 [MIT](LICENSE)
+
+
+## Esempi Lovelace
+
+Puoi copiare questo blocco YAML direttamente in una card di tipo "Manuale" (Dashboard → Modifica → Aggiungi card → Manuale).
+
+> **Nota:** gli entity_id qui sono in inglese (`sensor.allerta_er_a1_note`, `sensor.allerta_er_a1_hydraulic`, ...). Se la tua istanza HA ha la lingua italiana, gli ID saranno localizzati (es. `sensor.allerta_er_a1_nota`, `sensor.allerta_er_a1_idraulico`). In quel caso sostituiscili con quelli effettivamente presenti nella tua istanza.
+
+```yaml
+type: vertical-stack
+cards:
+  # Stato generale dell'area
+  - type: entities
+    title: Allerta Emilia-Romagna — Emil-A1
+    show_header_toggle: false
+    entities:
+      - entity: binary_sensor.allerta_er_a1_alert_active
+        name: Allerta attiva
+      - entity: sensor.allerta_er_a1_event
+        name: Livello di allerta (evento)
+      - entity: sensor.allerta_er_a1_issued
+        name: Emesso (sent)
+      - entity: sensor.allerta_er_a1_valid_from
+        name: Valido da (onset)
+      - entity: sensor.allerta_er_a1_valid_until
+        name: Valido fino a (expires)
+
+  # Nota del bollettino (testo integrale)
+  - type: markdown
+    title: Nota del bollettino
+    content: |
+      {{ state_attr('sensor.allerta_er_a1_note', 'testo') | default('Nessuna nota disponibile.') }}
+
+  # Criticità IDRAULICA — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_hydraulic
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_hydraulic
+      name: Idraulico
+      icon: mdi:water
+
+  # Criticità IDROGEOLOGICA — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_hydrogeological
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_hydrogeological
+      name: Idrogeologico
+      icon: mdi:landslide
+
+  # Temporali — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_thunderstorms
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_thunderstorms
+      name: Temporali
+      icon: mdi:weather-lightning
+
+  # Vento — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_wind
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_wind
+      name: Vento
+      icon: mdi:weather-windy
+
+  # Temperature estreme — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_extreme_temperatures
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_extreme_temperatures
+      name: Temperature estreme
+      icon: mdi:thermometer-alert
+
+  # Neve — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_snow
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_snow
+      name: Neve
+      icon: mdi:weather-snowy
+
+  # Pioggia che gela — mostrata solo se diversa da "verde"
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_freezing_rain
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_freezing_rain
+      name: Pioggia che gela
+      icon: mdi:weather-snowy-rainy
+
+  # Stato del mare — mostrata solo se diversa da "verde" (disabilitata di default)
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_sea_state
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_sea_state
+      name: Stato del mare
+      icon: mdi:waves
+
+  # Mareggiate — mostrata solo se diversa da "verde" (disabilitata di default)
+  - type: conditional
+    conditions:
+      - entity: sensor.allerta_er_a1_storm_surge
+        state_not: "verde"
+    card:
+      type: entity
+      entity: sensor.allerta_er_a1_storm_surge
+      name: Mareggiate
+      icon: mdi:wave
+```
+
+Le entità `stato_mare` e `mareggiate` sono **disabilitate di default** (non rilevanti per tutte le aree). Abilitele solo se l'area è costiera e vuoi visualizzarle.
+
+Per altre aree (A2, B1, ..., H2) sostituisci `a1` con il codice corretto (es. `b2`, `d2`).
