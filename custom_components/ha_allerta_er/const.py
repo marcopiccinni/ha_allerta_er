@@ -7,7 +7,7 @@ from typing import Final
 
 DOMAIN: Final = "ha_allerta_er"
 
-VERSION: Final = "0.1.0"
+VERSION: Final = "0.1.2"
 
 # AllertaMeteoER (Regione Emilia-Romagna) - public CAP 1.2 feed.
 # One <alert> with a single <note> and one <info> block per alert area.

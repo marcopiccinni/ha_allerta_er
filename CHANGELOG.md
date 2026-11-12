@@ -4,6 +4,21 @@ Tutte le modifiche rilevanti a questo progetto sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/) e il
 progetto adotta il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [0.1.2] - 2026-11-12
+
+### Fixed
+
+- Parser CAP: AllertaMeteoER (da circa l'11/11/2026) pubblica i livelli di
+  criticità con `valueName` suffissati per fascia temporale (es.
+  `IDRAULICO_2436`, `IDRAULICO_1224`) invece dei nomi storici (`IDRAULICO`, …).
+  I sensori di fenomeno risultavano `unknown` (`Sconosciuto`). Normalizzazione
+  al nome base, merge del livello più severo tra le fasce, default `verde` se il
+  fenomeno manca del tutto; avviso in log per `valueName` non riconosciuti.
+
+### Added
+
+- Test unitari su `parse_cap` con fixture dal feed CAP live (11/11/2026).
+
 ## [0.1.0] - 2026-10-15
 
 ### Added

@@ -49,6 +49,15 @@ PARAMETER_KEYS: Final = {
     "MAREGGIATE": "mareggiate",
 }
 
+# Relative severity for merging multi-horizon CAP parameters (e.g. ``_2436``).
+_LEVEL_RANK: Final = {
+    "verde": 0,
+    "bianco": 0,
+    "giallo": 1,
+    "arancione": 2,
+    "rosso": 3,
+}
+
 
 def parse_timestamp(value: str | None) -> datetime | None:
     """Parse a CAP timestamp (``<iso>[<Zone>]``) into an aware datetime."""
@@ -78,6 +87,66 @@ def _normalize(value: str | None) -> str | None:
         return None
     value = value.strip().lower()
     return value or None
+
+
+def _parameter_base_name(value_name: str) -> str | None:
+    """Map a CAP ``valueName`` to a known :data:`PARAMETER_KEYS` entry.
+
+    AllertaMeteoER used bare names (``IDRAULICO``) until Nov 2026; the feed then
+    switched to suffixed horizons (``IDRAULICO_2436``, ``IDRAULICO_1224``, …).
+    """
+    if value_name in PARAMETER_KEYS:
+        return value_name
+    if "_" in value_name:
+        base, suffix = value_name.rsplit("_", 1)
+        if suffix.isdigit() and base in PARAMETER_KEYS:
+            return base
+    return None
+
+
+def _merge_level(current: str | None, new: str | None) -> str | None:
+    """Keep the more severe of two normalized alert levels."""
+    if new is None:
+        return current
+    if current is None:
+        return new
+    if _LEVEL_RANK.get(new, -1) > _LEVEL_RANK.get(current, -1):
+        return new
+    return current
+
+
+def _ingest_parameters(
+    info: ET.Element, area: str
+) -> dict[str, str | None]:
+    """Parse and merge ``<parameter>`` blocks for one ``<info>`` area."""
+    parameters: dict[str, str | None] = {}
+    recognized_bases: set[str] = set()
+    unrecognized: set[str] = set()
+
+    for parameter in info.findall("cap:parameter", _NS):
+        raw_name = _text(parameter, "cap:valueName")
+        if not raw_name:
+            continue
+        base = _parameter_base_name(raw_name)
+        if base is None:
+            unrecognized.add(raw_name)
+            continue
+        recognized_bases.add(base)
+        value = _normalize(_text(parameter, "cap:value"))
+        parameters[base] = _merge_level(parameters.get(base), value)
+
+    if unrecognized:
+        _LOGGER.warning(
+            "Unrecognized CAP parameter valueName in area %s: %s",
+            area,
+            ", ".join(sorted(unrecognized)),
+        )
+
+    for base in PARAMETER_KEYS:
+        if base not in recognized_bases:
+            parameters[base] = "verde"
+
+    return parameters
 
 
 def _text(element: ET.Element | None, path: str) -> str | None:
@@ -146,11 +215,7 @@ def parse_cap(xml_bytes: bytes) -> AlertFeed:
         if feed.language is None:
             feed.language = _text(info, "cap:language")
 
-        parameters: dict[str, str | None] = {}
-        for parameter in info.findall("cap:parameter", _NS):
-            name = _text(parameter, "cap:valueName")
-            if name:
-                parameters[name] = _normalize(_text(parameter, "cap:value"))
+        parameters = _ingest_parameters(info, area)
 
         feed.areas[area] = AreaInfo(
             area=area,

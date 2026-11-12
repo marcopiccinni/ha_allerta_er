@@ -25,10 +25,13 @@ Radice `<alert>` **unica** con:
 - **18 `<info>`**, uno per area: `Emil-A1, A2, B1, B2, C1, C2, D1, D2, D3, E1,
   E2, F1, F2, F3, G1, G2, H1, H2`.
 - Ogni `<info>` contiene: `<area><areaDesc>` (il codice area), `<event>` (il
-  livello di allerta, es. `VERDE`), **`<onset>`/`<expires>` propri**, e **9
-  `<parameter>`** con coppie `valueName`/`value`:
+  livello di allerta, es. `VERDE`), **`<onset>`/`<expires>` propri**, e **18
+  `<parameter>`** (dal 11/11/2026; prima erano 9) con coppie `valueName`/`value`.
+  I `valueName` usano il prefisso della criticità e un suffisso numerico per la
+  fascia temporale (es. `IDRAULICO_2436`, `IDRAULICO_1224`). L'integrazione
+  normalizza al nome base e tiene il livello **più severo** tra le fasce:
 
-  | valueName | chiave entità |
+  | valueName (base) | chiave entità |
   | --- | --- |
   | `IDRAULICO` | `idraulico` |
   | `IDROGEOLOGICO` | `idrogeologico` |
@@ -40,9 +43,13 @@ Radice `<alert>` **unica** con:
   | `STATO_MARE` | `stato_mare` |
   | `MAREGGIATE` | `mareggiate` |
 
+  Resta supportato il formato storico senza suffisso (`IDRAULICO`, …).
+
 - I valori dei parametri **differiscono per area** e possono essere **vuoti**
   (`<value/>`): verificato su `STATO_MARE`, vuoto in 16 aree su 18 e valorizzato
   solo su `Emil-B2` e `Emil-D2`. Un valore vuoto → `None` → stato `unknown`.
+  Se un fenomeno non compare affatto nel feed (nome non riconosciuto / assente),
+  il parser imposta `verde`.
 
 ### Timestamp
 
