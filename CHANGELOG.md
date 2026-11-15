@@ -4,6 +4,25 @@ Tutte le modifiche rilevanti a questo progetto sono documentate in questo file.
 Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.1.0/) e il
 progetto adotta il [Semantic Versioning](https://semver.org/lang/it/).
 
+## [0.1.3] - 2026-11-15
+
+### Fixed
+
+- Download del feed CAP: fino a 3 tentativi con breve attesa (2 s / 5 s) in caso
+  di errori TLS/rete (`ClientError`, `SSLError`, timeout) o risposta HTTP 5xx;
+  avviso in log a ogni tentativo fallito. Riduce gli `unavailable` da errori
+  transienti come `EOF occurred in violation of protocol`.
+
+### Changed
+
+- Dopo un aggiornamento fallito, il coordinator ripete il poll ogni 5 minuti
+  finché il feed torna disponibile, poi ripristina l'intervallo configurato
+  (es. 3600 s); messaggio informativo in log al recupero.
+
+### Added
+
+- Test su retry del fetch CAP e su intervallo di ripresa del coordinator.
+
 ## [0.1.2] - 2026-11-12
 
 ### Fixed

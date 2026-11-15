@@ -7,7 +7,14 @@ from typing import Final
 
 DOMAIN: Final = "ha_allerta_er"
 
-VERSION: Final = "0.1.2"
+VERSION: Final = "0.1.3"
+
+# CAP HTTP fetch: attempts and pause (seconds) before the 2nd and 3rd try.
+CAP_FETCH_MAX_ATTEMPTS: Final = 3
+CAP_FETCH_RETRY_BACKOFF: Final = (2, 5)
+
+# After a failed coordinator refresh, poll every 5 minutes until success.
+RECOVERY_SCAN_INTERVAL: Final = 300
 
 # AllertaMeteoER (Regione Emilia-Romagna) - public CAP 1.2 feed.
 # One <alert> with a single <note> and one <info> block per alert area.

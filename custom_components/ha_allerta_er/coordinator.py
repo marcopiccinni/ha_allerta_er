@@ -17,6 +17,7 @@ from .const import (
     CONF_SCAN_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    RECOVERY_SCAN_INTERVAL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -89,32 +90,70 @@ class AreaAlertCoordinator(DataUpdateCoordinator[AreaAlertData]):
         )
         self.entry = entry
         self.cache = cache or async_get_feed_cache(hass)
+        self._recovery_mode = False
         entry.async_on_unload(entry.add_update_listener(self._async_options_updated))
+
+    def _scan_interval_seconds(self) -> int:
+        """Configured refresh interval from the config entry options."""
+        return int(
+            self.entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+        )
+
+    def _apply_configured_interval(self) -> None:
+        """Restore the user-configured coordinator refresh interval."""
+        self.update_interval = timedelta(seconds=self._scan_interval_seconds())
+
+    def _apply_recovery_interval(self) -> None:
+        """Poll more often after a failed update until the feed is healthy again."""
+        if not self._recovery_mode:
+            _LOGGER.warning(
+                "CAP feed update failed for %s; retrying every %s s until recovery",
+                self.area,
+                RECOVERY_SCAN_INTERVAL,
+            )
+        self._recovery_mode = True
+        self.update_interval = timedelta(seconds=RECOVERY_SCAN_INTERVAL)
+
+    def _clear_recovery_interval(self) -> None:
+        """Return to the configured interval after a successful update."""
+        if self._recovery_mode:
+            seconds = self._scan_interval_seconds()
+            _LOGGER.info(
+                "CAP feed recovered for %s; restored refresh interval to %s s",
+                self.area,
+                seconds,
+            )
+        self._recovery_mode = False
+        self._apply_configured_interval()
 
     async def _async_options_updated(
         self, hass: HomeAssistant, entry: ConfigEntry
     ) -> None:
-        self.update_interval = timedelta(
-            seconds=int(entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
-        )
+        if not self._recovery_mode:
+            self._apply_configured_interval()
         await self.async_request_refresh()
 
     async def _async_update_data(self) -> AreaAlertData:
         try:
             feed = await self.cache.async_get()
         except TimeoutError as err:
+            self._apply_recovery_interval()
             raise UpdateFailed("Timeout while fetching the CAP feed") from err
         except aiohttp.ClientError as err:
+            self._apply_recovery_interval()
             raise UpdateFailed(f"Error fetching the CAP feed: {err}") from err
         except ValueError as err:
+            self._apply_recovery_interval()
             raise UpdateFailed(f"Invalid CAP feed: {err}") from err
 
         info = feed.area(self.area)
         if info is None:
+            self._apply_recovery_interval()
             raise UpdateFailed(
                 f"Area {self.area} is not present in the CAP feed"
             )
 
+        self._clear_recovery_interval()
         return AreaAlertData(
             area=self.area,
             label=area_label(self.area),

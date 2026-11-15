@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import ssl
 import time
 import xml.etree.ElementTree as ET
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Final
@@ -27,7 +29,14 @@ import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CAP_URL, DOMAIN, FEED_TTL, USER_AGENT
+from .const import (
+    CAP_FETCH_MAX_ATTEMPTS,
+    CAP_FETCH_RETRY_BACKOFF,
+    CAP_URL,
+    DOMAIN,
+    FEED_TTL,
+    USER_AGENT,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -230,14 +239,60 @@ def parse_cap(xml_bytes: bytes) -> AlertFeed:
     return feed
 
 
-async def async_fetch_cap(session: aiohttp.ClientSession) -> AlertFeed:
-    """Fetch and parse the CAP document."""
+async def _async_fetch_cap_once(session: aiohttp.ClientSession) -> AlertFeed:
+    """Perform a single CAP HTTP GET and parse the payload."""
     async with session.get(
         CAP_URL, headers={"User-Agent": USER_AGENT}, timeout=_TIMEOUT
     ) as response:
+        if response.status >= 500:
+            raise aiohttp.ClientResponseError(
+                response.request_info,
+                response.history,
+                status=response.status,
+                message=f"CAP feed returned HTTP {response.status}",
+                headers=response.headers,
+            )
         response.raise_for_status()
         payload = await response.read()
     return parse_cap(payload)
+
+
+async def async_fetch_cap(
+    session: aiohttp.ClientSession,
+    *,
+    fetch_once: Callable[[aiohttp.ClientSession], Awaitable[AlertFeed]] | None = None,
+) -> AlertFeed:
+    """Fetch and parse the CAP document, retrying transient failures."""
+    attempt_fetch = fetch_once or _async_fetch_cap_once
+    last_error: BaseException | None = None
+
+    for attempt in range(1, CAP_FETCH_MAX_ATTEMPTS + 1):
+        try:
+            return await attempt_fetch(session)
+        except ValueError:
+            raise
+        except (aiohttp.ClientError, ssl.SSLError, TimeoutError) as err:
+            last_error = err
+            if attempt < CAP_FETCH_MAX_ATTEMPTS:
+                delay = CAP_FETCH_RETRY_BACKOFF[attempt - 1]
+                _LOGGER.warning(
+                    "CAP feed fetch attempt %s/%s failed (%s); retrying in %s s",
+                    attempt,
+                    CAP_FETCH_MAX_ATTEMPTS,
+                    err,
+                    delay,
+                )
+                await asyncio.sleep(delay)
+            else:
+                _LOGGER.warning(
+                    "CAP feed fetch attempt %s/%s failed (%s); no retries left",
+                    attempt,
+                    CAP_FETCH_MAX_ATTEMPTS,
+                    err,
+                )
+
+    assert last_error is not None
+    raise last_error
 
 
 class CapFeedCache:
